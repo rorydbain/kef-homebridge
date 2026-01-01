@@ -3289,7 +3289,6 @@ var require_dist = __commonJS((exports) => {
 });
 
 // src/discovery.ts
-var import_bonjour_service = __toESM(require_dist(), 1);
 var KEF_NAME_PATTERNS = [/^LSX/i, /^LS50/i, /^LS60/i, /^KEF/i];
 function isKefSpeaker(name) {
   return KEF_NAME_PATTERNS.some((pattern) => pattern.test(name));
@@ -3297,18 +3296,24 @@ function isKefSpeaker(name) {
 
 class SpeakerDiscovery {
   log;
-  bonjour;
+  bonjour = null;
   browser = null;
   discoveredSpeakers = new Map;
   constructor(log) {
     this.log = log;
-    this.bonjour = new import_bonjour_service.default;
   }
-  start(callbacks) {
+  async start(callbacks) {
     this.log.info("Starting mDNS discovery for KEF speakers...");
-    this.browser = this.bonjour.find({ type: "http" }, (service) => {
-      this.handleService(service, callbacks);
-    });
+    try {
+      const bonjourModule = await Promise.resolve().then(() => __toESM(require_dist(), 1));
+      const Bonjour = bonjourModule.Bonjour;
+      this.bonjour = new Bonjour;
+      this.browser = this.bonjour.find({ type: "http" }, (service) => {
+        this.handleService(service, callbacks);
+      });
+    } catch (error) {
+      this.log.error("Failed to start mDNS discovery:", error);
+    }
   }
   handleService(service, callbacks) {
     const name = service.name;
@@ -3337,7 +3342,10 @@ class SpeakerDiscovery {
       this.browser.stop();
       this.browser = null;
     }
-    this.bonjour.destroy();
+    if (this.bonjour) {
+      this.bonjour.destroy();
+      this.bonjour = null;
+    }
     this.log.info("Stopped mDNS discovery");
   }
   getDiscoveredSpeakers() {
@@ -3673,7 +3681,7 @@ class KefSpeakerPlatform {
     }
     if (autodiscover) {
       this.discovery = new SpeakerDiscovery(this.log);
-      this.discovery.start({
+      await this.discovery.start({
         onSpeakerFound: async (speaker) => {
           await this.addSpeaker(speaker, pollingInterval);
         }

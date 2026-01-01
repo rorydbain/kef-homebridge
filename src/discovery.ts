@@ -1,4 +1,3 @@
-import Bonjour, { type Service } from 'bonjour-service';
 import type { Logger } from 'homebridge';
 
 export interface DiscoveredSpeaker {
@@ -19,23 +18,30 @@ function isKefSpeaker(name: string): boolean {
 }
 
 export class SpeakerDiscovery {
-  private bonjour: Bonjour;
-  private browser: ReturnType<Bonjour['find']> | null = null;
+  private bonjour: any = null;
+  private browser: any = null;
   private discoveredSpeakers = new Map<string, DiscoveredSpeaker>();
 
-  constructor(private readonly log: Logger) {
-    this.bonjour = new Bonjour();
-  }
+  constructor(private readonly log: Logger) {}
 
-  start(callbacks: DiscoveryCallbacks): void {
+  async start(callbacks: DiscoveryCallbacks): Promise<void> {
     this.log.info('Starting mDNS discovery for KEF speakers...');
 
-    this.browser = this.bonjour.find({ type: 'http' }, (service: Service) => {
-      this.handleService(service, callbacks);
-    });
+    try {
+      // Dynamic import to handle CommonJS/ESM compatibility
+      const bonjourModule = await import('bonjour-service');
+      const Bonjour = bonjourModule.Bonjour;
+
+      this.bonjour = new Bonjour();
+      this.browser = this.bonjour.find({ type: 'http' }, (service: any) => {
+        this.handleService(service, callbacks);
+      });
+    } catch (error) {
+      this.log.error('Failed to start mDNS discovery:', error);
+    }
   }
 
-  private handleService(service: Service, callbacks: DiscoveryCallbacks): void {
+  private handleService(service: any, callbacks: DiscoveryCallbacks): void {
     const name = service.name;
 
     if (!isKefSpeaker(name)) {
@@ -44,7 +50,7 @@ export class SpeakerDiscovery {
 
     // Get the first IPv4 address
     const ip = service.addresses?.find(
-      (addr) => addr.includes('.') && !addr.startsWith('169.254'),
+      (addr: string) => addr.includes('.') && !addr.startsWith('169.254'),
     );
 
     if (!ip) {
@@ -71,7 +77,10 @@ export class SpeakerDiscovery {
       this.browser.stop();
       this.browser = null;
     }
-    this.bonjour.destroy();
+    if (this.bonjour) {
+      this.bonjour.destroy();
+      this.bonjour = null;
+    }
     this.log.info('Stopped mDNS discovery');
   }
 

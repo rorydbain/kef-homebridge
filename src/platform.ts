@@ -66,7 +66,7 @@ export class KefSpeakerPlatform implements DynamicPlatformPlugin {
     // Start autodiscovery if enabled
     if (autodiscover) {
       this.discovery = new SpeakerDiscovery(this.log);
-      this.discovery.start({
+      await this.discovery.start({
         onSpeakerFound: async (speaker) => {
           await this.addSpeaker(speaker, pollingInterval);
         },
