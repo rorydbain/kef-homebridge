@@ -1,6 +1,13 @@
 # homebridge-kef-lsx
 
-Homebridge plugin to control KEF wireless speakers via HomeKit.
+[![npm](https://img.shields.io/npm/v/homebridge-kef-lsx)](https://www.npmjs.com/package/homebridge-kef-lsx)
+[![license](https://img.shields.io/npm/l/homebridge-kef-lsx)](LICENSE)
+
+Control your KEF wireless speakers with Apple HomeKit via Homebridge.
+
+<p align="center">
+  <img src="images/homekit-screenshot.png" alt="HomeKit Screenshot" width="300">
+</p>
 
 ## Supported Speakers
 
@@ -10,24 +17,38 @@ Homebridge plugin to control KEF wireless speakers via HomeKit.
 
 ## Features
 
-- **Source switching** - Switch between WiFi, Bluetooth, HDMI/TV, Optical, USB, and Analog inputs
-- **Volume control** - Adjust volume via a brightness slider (HomeKit doesn't have native volume)
 - **Power control** - Turn speakers on/off
-- **Auto-discovery** - Speakers are found automatically via mDNS
+- **Source switching** - WiFi, Bluetooth, HDMI/TV, Optical, USB, Analog
+- **Volume control** - Via brightness slider (lightbulb accessory)
+- **Auto-discovery** - Speakers found automatically via mDNS
 
 ## Installation
+
+### Via Homebridge UI (Recommended)
+
+Search for "KEF" in the Homebridge plugin search and click Install.
+
+### Via Command Line
 
 ```bash
 npm install -g homebridge-kef-lsx
 ```
 
-Or search for "KEF" in the Homebridge UI.
-
 ## Configuration
 
-The plugin auto-discovers KEF speakers on your network. No configuration is required.
+The plugin automatically discovers KEF speakers on your network. Just add the platform to your config:
 
-Optional settings in `config.json`:
+```json
+{
+  "platforms": [
+    {
+      "platform": "KEFSpeaker"
+    }
+  ]
+}
+```
+
+### Optional Settings
 
 ```json
 {
@@ -49,39 +70,32 @@ Optional settings in `config.json`:
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `autodiscover` | `true` | Automatically find speakers via mDNS |
-| `pollingInterval` | `5000` | How often to sync state (ms) |
-| `speakers` | `[]` | Manual speaker config (optional fallback) |
+| `autodiscover` | `true` | Find speakers automatically via mDNS |
+| `pollingInterval` | `5000` | State sync interval in milliseconds |
+| `speakers` | `[]` | Manual speaker config (fallback if autodiscovery fails) |
 
-## HomeKit Devices
+## How It Works
 
-Each speaker appears as two accessories:
+Each speaker appears as two accessories in HomeKit:
 
-1. **TV** - Shows power state, tap to select input source
-2. **Lightbulb** - Volume control (brightness = volume, on/off = mute)
+1. **TV Accessory** - Power button and input source selector
+2. **Lightbulb** - Volume control (brightness = volume %)
 
-## NFC Quick Switch (Bonus)
+The lightbulb is a workaround since HomeKit doesn't have a native volume control. "Hey Siri, set KEF volume to 50%" works great!
 
-Want to tap your phone to switch to Bluetooth? Create an Apple Shortcut:
+## Troubleshooting
 
-1. **Shortcuts app** → New Shortcut → "Get Contents of URL"
-2. **URL**: `http://<speaker-ip>/api/setData`
-3. **Method**: POST
-4. **Headers**: `Content-Type: application/json`
-5. **Body**:
-```json
-{
-  "path": "settings:/kef/play/physicalSource",
-  "role": "value",
-  "value": {
-    "type": "kefPhysicalSource",
-    "kefPhysicalSource": "bluetooth"
-  }
-}
-```
+### Speaker not discovered
 
-Then create an NFC automation to run this shortcut when you tap a tag.
+1. Ensure your speaker and Homebridge are on the same network/VLAN
+2. Try adding the speaker manually with its IP address
+3. Check that the speaker's network settings allow local API access
+
+### IP address changes
+
+Set a DHCP reservation in your router so your speaker always gets the same IP.
 
 ## License
 
 MIT
+
