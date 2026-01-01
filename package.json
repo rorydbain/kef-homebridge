@@ -6,6 +6,14 @@
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rorydbain/kef-homebridge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rorydbain/kef-homebridge/issues"
+  },
+  "homepage": "https://github.com/rorydbain/kef-homebridge#readme",
   "scripts": {
     "build": "bun build src/index.ts --outdir dist --target node",
     "watch": "bun build src/index.ts --outdir dist --target node --watch",

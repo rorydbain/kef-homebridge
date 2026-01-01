@@ -174,8 +174,8 @@ dist
 # Finder (MacOS) folder config
 .DS_Store
 
-# Build output (not ignored - committed for easy deployment)
-# dist/
+# Build output
+dist/
 
 # Claude settings
 .claude/

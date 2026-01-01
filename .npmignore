@@ -1,0 +1,20 @@
+# Source files (dist/ is published instead)
+src/
+tsconfig.json
+
+# Dev/test files
+.homebridge-test/
+.claude/
+
+# Git/IDE
+.git/
+.gitignore
+.idea/
+.vscode/
+
+# Bun
+bun.lockb
+
+# Misc
+*.md
+!README.md
