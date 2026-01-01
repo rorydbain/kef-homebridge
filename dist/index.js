@@ -3487,6 +3487,8 @@ class KefAccessory {
   currentSource = "wifi";
   currentVolume = 50;
   currentMute = false;
+  lastStateChange = 0;
+  stateChangeDebounceMs = 3000;
   constructor(platform, accessory, speakerIp, pollingMs = 5000) {
     this.platform = platform;
     this.accessory = accessory;
@@ -3533,6 +3535,7 @@ class KefAccessory {
     try {
       await this.api.setPower(isOn);
       this.currentPower = isOn;
+      this.lastStateChange = Date.now();
     } catch (error) {
       this.platform.log.error("Failed to set power:", error);
       throw error;
@@ -3558,6 +3561,7 @@ class KefAccessory {
     try {
       await this.api.setSource(source.id);
       this.currentSource = source.id;
+      this.lastStateChange = Date.now();
     } catch (error) {
       this.platform.log.error("Failed to set source:", error);
       throw error;
@@ -3577,6 +3581,7 @@ class KefAccessory {
     try {
       await this.api.setMute(muted);
       this.currentMute = muted;
+      this.lastStateChange = Date.now();
     } catch (error) {
       this.platform.log.error("Failed to set mute:", error);
       throw error;
@@ -3596,6 +3601,7 @@ class KefAccessory {
     try {
       await this.api.setVolume(volume);
       this.currentVolume = volume;
+      this.lastStateChange = Date.now();
     } catch (error) {
       this.platform.log.error("Failed to set volume:", error);
       throw error;
@@ -3603,6 +3609,9 @@ class KefAccessory {
   }
   startPolling() {
     this.pollingInterval = setInterval(async () => {
+      if (Date.now() - this.lastStateChange < this.stateChangeDebounceMs) {
+        return;
+      }
       try {
         const [power, source, volume, mute] = await Promise.all([
           this.api.getPowerStatus(),

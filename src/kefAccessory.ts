@@ -21,6 +21,10 @@ export class KefAccessory {
   private currentVolume = 50;
   private currentMute = false;
 
+  // Debounce polling after state changes to prevent UI flicker
+  private lastStateChange = 0;
+  private readonly stateChangeDebounceMs = 3000;
+
   constructor(
     private readonly platform: { readonly log: Logger; readonly api: API },
     private readonly accessory: PlatformAccessory,
@@ -149,6 +153,7 @@ export class KefAccessory {
     try {
       await this.api.setPower(isOn);
       this.currentPower = isOn;
+      this.lastStateChange = Date.now();
     } catch (error) {
       this.platform.log.error('Failed to set power:', error);
       throw error;
@@ -177,6 +182,7 @@ export class KefAccessory {
     try {
       await this.api.setSource(source.id);
       this.currentSource = source.id;
+      this.lastStateChange = Date.now();
     } catch (error) {
       this.platform.log.error('Failed to set source:', error);
       throw error;
@@ -198,6 +204,7 @@ export class KefAccessory {
     try {
       await this.api.setMute(muted);
       this.currentMute = muted;
+      this.lastStateChange = Date.now();
     } catch (error) {
       this.platform.log.error('Failed to set mute:', error);
       throw error;
@@ -219,6 +226,7 @@ export class KefAccessory {
     try {
       await this.api.setVolume(volume);
       this.currentVolume = volume;
+      this.lastStateChange = Date.now();
     } catch (error) {
       this.platform.log.error('Failed to set volume:', error);
       throw error;
@@ -227,6 +235,11 @@ export class KefAccessory {
 
   private startPolling(): void {
     this.pollingInterval = setInterval(async () => {
+      // Skip polling if we recently changed state (prevents UI flicker)
+      if (Date.now() - this.lastStateChange < this.stateChangeDebounceMs) {
+        return;
+      }
+
       try {
         const [power, source, volume, mute] = await Promise.all([
           this.api.getPowerStatus(),
