@@ -1,0 +1,48 @@
+{
+  "pluginAlias": "KEFSpeaker",
+  "pluginType": "platform",
+  "singular": true,
+  "headerDisplay": "Control KEF speakers (LSX II, LS50 Wireless II, LS60) via HomeKit.",
+  "footerDisplay": "Speakers are automatically discovered on your network. Manual configuration is optional.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "autodiscover": {
+        "title": "Auto-discover speakers",
+        "type": "boolean",
+        "default": true,
+        "description": "Automatically find KEF speakers on your network using mDNS/Bonjour."
+      },
+      "pollingInterval": {
+        "title": "Polling interval (ms)",
+        "type": "integer",
+        "default": 5000,
+        "minimum": 1000,
+        "maximum": 60000,
+        "description": "How often to poll speakers for state changes (in milliseconds)."
+      },
+      "speakers": {
+        "title": "Manual speakers",
+        "description": "Manually configure speakers if autodiscovery fails.",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "title": "Name",
+              "type": "string",
+              "placeholder": "Living Room Speakers"
+            },
+            "ip": {
+              "title": "IP Address",
+              "type": "string",
+              "format": "ipv4",
+              "placeholder": "192.168.1.100",
+              "required": true
+            }
+          }
+        }
+      }
+    }
+  }
+}
