@@ -112,6 +112,7 @@ export class KefAccessory {
 
       inputService
         .setCharacteristic(Characteristic.Identifier, index)
+        .setCharacteristic(Characteristic.Name, source.name)
         .setCharacteristic(Characteristic.ConfiguredName, source.name)
         .setCharacteristic(
           Characteristic.IsConfigured,

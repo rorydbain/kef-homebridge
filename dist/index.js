@@ -3514,7 +3514,7 @@ class KefAccessory {
     this.accessory.services.filter((s) => s.UUID === Service.InputSource.UUID).forEach((s) => this.accessory.removeService(s));
     KEF_SOURCES.forEach((source, index) => {
       const inputService = this.accessory.addService(Service.InputSource, source.name, source.id);
-      inputService.setCharacteristic(Characteristic.Identifier, index).setCharacteristic(Characteristic.ConfiguredName, source.name).setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.CONFIGURED).setCharacteristic(Characteristic.InputSourceType, Characteristic.InputSourceType.OTHER).setCharacteristic(Characteristic.CurrentVisibilityState, Characteristic.CurrentVisibilityState.SHOWN);
+      inputService.setCharacteristic(Characteristic.Identifier, index).setCharacteristic(Characteristic.Name, source.name).setCharacteristic(Characteristic.ConfiguredName, source.name).setCharacteristic(Characteristic.IsConfigured, Characteristic.IsConfigured.CONFIGURED).setCharacteristic(Characteristic.InputSourceType, Characteristic.InputSourceType.OTHER).setCharacteristic(Characteristic.CurrentVisibilityState, Characteristic.CurrentVisibilityState.SHOWN);
       this.tvService.addLinkedService(inputService);
       this.inputServices.push(inputService);
     });
